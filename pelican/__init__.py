@@ -178,7 +178,7 @@ class Pelican(object):
         for flavour in flavours:
 
             if flavour != None:
-                context.update('OUTPUT_FLAVOUR', str(flavour))
+                context.update(OUTPUT_FLAVOUR=str(flavour))
 
             writer = self.get_writer(flavour)
 
