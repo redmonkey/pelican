@@ -168,16 +168,24 @@ class Pelican(object):
                 os.path.realpath(self.path).startswith(self.output_path)):
             clean_output_dir(self.output_path)
 
-        writer = self.get_writer()
-
         # pass the assets environment to the generators
         if self.settings['WEBASSETS']:
             generators[1].env.assets_environment = generators[0].assets_env
             generators[2].env.assets_environment = generators[0].assets_env
 
-        for p in generators:
-            if hasattr(p, 'generate_output'):
-                p.generate_output(writer)
+        
+        flavours = self.settings.get('OUTPUT_FLAVOURS', (None,))
+        for flavour in flavours:
+
+            if flavour != None:
+                context.update('OUTPUT_FLAVOUR', str(flavour))
+
+            writer = self.get_writer(flavour)
+
+            for p in generators:
+                if hasattr(p, 'generate_output'):
+                    p.generate_output(writer)
+
 
     def get_generator_classes(self):
         generators = [StaticGenerator, ArticlesGenerator, PagesGenerator]
@@ -199,8 +207,11 @@ class Pelican(object):
 
         return generators
 
-    def get_writer(self):
-        return Writer(self.output_path, settings=self.settings)
+    def get_writer(self, flavour=None):
+        path = self.output_path
+        if flavour != None:
+            path = os.path.join(path, flavour)
+        return Writer(path, settings=self.settings)
 
 
 def parse_arguments():
